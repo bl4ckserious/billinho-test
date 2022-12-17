@@ -8,47 +8,37 @@ class Enrollment < ApplicationRecord
     validates :amount, :installments, :due_day, presence: true
     validates :amount, comparison: {greater_than: 0}
     validates :installments, comparison: {greater_than_or_equal_to: 1}
-    validates :due_day, comparison: {greater_than_or_equal_to: 1, less_than_or_equal_to: 31}
+    validates :due_day, numericality: {in: 1..31}
 
     private
 
     def create_invoice
-        cur_d = Date.today
-        sub_t = (amount / installments).ceil(2)
-        count = 1
- 
-        while count <= installments
+        current_date = Date.today       
+        installments_amount = amount.to_f / installments
+        due_dates = []
 
-            begin
-                if count == 1
-                    due_d = Date.new(cur_d.year, cur_d.month, due_day)
-                else
-                    due_d = Date.new(due_d.year, due_d.month, due_day)
-                end
-            rescue => exception
-                due_d = Date.new(due_d.year, due_d.month, -1)
-            end
+        installments.times do |i|
+            due_date = next_due_date(current_date, i, due_dates)
+            due_dates << due_date
 
-            if due_d >= cur_d && count == 1
-                invoices = Billing.new(enrollment_id:id, amount: sub_t, due_date: due_d, status: :open)
+            Billing.create(enrollment_id:id, amount: installments_amount, due_date: due_date, status: :open)
+        end
+    end
 
-                due_d = due_d.next_month
-                invoices.save
-            elsif due_d < cur_d && count == 1   
-                due_d = due_d.next_month 
+    def next_due_date(current_date, index, due_dates)
+        begin
+            due_date = Date.new(current_date.year, current_date.month, due_day).advance(months: index)
 
-                invoices = Billing.new(enrollment_id:id, amount: sub_t, due_date: due_d, status: :open)
-
-                due_d = due_d.next_month 
-                invoices.save
+            if due_date < current_date && index == 0
+                due_date.next_month 
+            elsif (due_dates.include?due_date)
+                due_date.next_month
             else
-                invoices = Billing.new(enrollment_id:id, amount: sub_t, due_date: due_d, status: :open)
-
-                due_d = due_d.next_month 
-                invoices.save
+                due_date
             end
-            
-            count += 1
+
+        rescue
+            current_date.end_of_month.advance(months: index) 
         end
     end
 end
