@@ -1,6 +1,8 @@
-class Institution < ApplicationRecord
-    has_many :enrollments, dependent: :destroy
+# frozen_string_literal: true
 
-    validates :name, presence:true, uniqueness:true
-    validates :cnpj, presence:true, uniqueness:true, numericality: {only_integer: true}, length: {is: 14}
+class Institution < ApplicationRecord
+  has_many :enrollments, dependent: :destroy
+
+  validates :name, presence: true, uniqueness: true
+  validates :cnpj, presence: true, uniqueness: true, numericality: { only_integer: true }, length: { is: 14 }
 end
