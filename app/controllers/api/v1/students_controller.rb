@@ -30,9 +30,9 @@ module Api
         student = Student.find(params[:id])
 
         if student.update(student_params)
-          render json: { status: 'SUCCESS', message: 'Updated data', data: student }, status: :ok
+          render json: { status: 'SUCCESS', message: 'Updated data', data: student.as_json(except: %i[created_at updated_at]) }, status: :ok
         else
-          render json: { status: 'ERROR', message: 'Data not updated', data: student }, status: :unprocessable_entity
+          render json: { status: 'ERROR', message: 'Data not updated', data: student.as_json(except: %i[created_at updated_at]) }, status: :unprocessable_entity
         end
       end
 

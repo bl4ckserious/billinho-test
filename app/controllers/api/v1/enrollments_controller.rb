@@ -4,6 +4,9 @@ module Api
   module V1
     class EnrollmentsController < ApplicationController
       include Paginable
+      include ActionController::HttpAuthentication::Basic::ControllerMethods
+
+      before_action :authenticate
 
       def index
         enrollments = Enrollment.page(current_page).per(count)
@@ -18,7 +21,7 @@ module Api
             amount: e.amount,
             installments: e.installments,
             due_day: e.due_day,
-            bills: bills.as_json(except: %i[created_at updated_at])
+            bills: bills.as_json(except: %i[created_at updated_at enrollment_id])
           }
         end
 
@@ -31,7 +34,7 @@ module Api
         render json: { status: 'SUCCESS', message: 'Enrollment loaded', data: enrollment }, status: :ok
       end
 
-      def create
+      def create       
         enrollment = Enrollment.new(enrollment_params)
 
         if enrollment.save
@@ -52,20 +55,20 @@ module Api
       end
 
       def update
-        enrollment = Institution.find(params[:id])
+        enrollment = Enrollment.find(params[:id])
 
         if enrollment.update(enrollment_params)
-          render json: { status: 'SUCCESS', message: 'Institution updated', data: enrollment }, status: :ok
+          render json: { status: 'SUCCESS', message: 'Enrollment updated', data: enrollment }, status: :ok
         else
-          render json: { status: 'ERROR', message: 'Institution not updated', data: enrollment }, status: :unprocessable_entity
+          render json: { status: 'ERROR', message: 'Enrollment not updated', data: enrollment }, status: :unprocessable_entity
         end
       end
 
       def destroy
-        enrollment = Institution.find(params[:id])
+        enrollment = Enrollment.find(params[:id])
         enrollment.destroy
 
-        render json: { status: 'SUCCESS', message: 'Institution deleted', data: enrollment }, status: :ok
+        render json: { status: 'SUCCESS', message: 'Enrollment deleted', data: enrollment }, status: :ok
       end
 
       private
@@ -73,6 +76,12 @@ module Api
       def enrollment_params
         params.permit(:student_id, :institution_id, :amount, :installments, :due_day)
       end
+
+      def authenticate
+        authenticate_or_request_with_http_basic do |username, password|
+          username == 'admin_ops' && password == 'billing'
+      end
     end
+  end
   end
 end
