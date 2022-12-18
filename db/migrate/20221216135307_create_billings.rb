@@ -11,6 +11,9 @@ class CreateBillings < ActiveRecord::Migration[7.0]
       t.timestamps
     end
 
+    #rename_table :oldname, :newname
+
+
     add_foreign_key :billings, :enrollments, column: :enrollment_id
   end
 end
