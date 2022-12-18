@@ -13,7 +13,7 @@ module Api
       def show
         student = Student.find(params[:id])
 
-        render json: { status: 'SUCCESS', message: 'Loaded student', data: student }, status: :ok
+        render json: { message: 'Loaded student', data: student }, status: :ok
       end
 
       def create
@@ -30,9 +30,9 @@ module Api
         student = Student.find(params[:id])
 
         if student.update(student_params)
-          render json: { status: 'SUCCESS', message: 'Updated data', data: student.as_json(except: %i[created_at updated_at]) }, status: :ok
+          render json: { message: 'Updated data', data: student.as_json(except: %i[created_at updated_at]) }, status: :ok
         else
-          render json: { status: 'ERROR', message: 'Data not updated', data: student.as_json(except: %i[created_at updated_at]) }, status: :unprocessable_entity
+          render json: { status: 'ERROR', message: 'Data not updated', data: student.erros }, status: :unprocessable_entity
         end
       end
 
@@ -40,7 +40,7 @@ module Api
         student = Student.find(params[:id])
         student.destroy
 
-        render json: { status: 'SUCCESS', message: 'Deleted student', data: student }, status: :ok
+        render json: { message: 'Deleted student', data: student }, status: :ok
       end
 
       private

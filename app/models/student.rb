@@ -10,47 +10,47 @@ class Student < ApplicationRecord
 
   enum payment_method: { credit_card: 'Cartão de crédito', boleto: 'Boleto' }
 
-    def as_json(options = {})
-        super(options).tap do |json|
-            json['birth_date'] = birth_date.strftime('%d/%m/%Y')
-        end
+  def as_json(options = {})
+    super(options).tap do |json|
+      json['birth_date'] = birth_date.strftime('%d/%m/%Y')
     end
+  end
 
   private
 
-    def validate_cpf
-        cpf = self.cpf.gsub(/[.-]/, '')
-        if cpf.length != 11 || cpf.chars.uniq.length == 1
-        errors.add(:cpf, 'não é válido')
-        return false
-        end
-
-        digit1 = calculate_digit1(cpf)
-        digit2 = calculate_digit2(cpf, digit1)
-
-        if cpf[9].to_i != digit1 || cpf[10].to_i != digit2
-        errors.add(:cpf, 'não é válido')
-        return false
-        end
-
-        true
+  def validate_cpf
+    cpf = self.cpf.gsub(/[.-]/, '')
+    if cpf.length != 11 || cpf.chars.uniq.length == 1
+      errors.add(:cpf, 'não é válido')
+      return false
     end
 
-    def calculate_digit1(cpf)
-        sum = 0
-        9.times do |i|
-        sum += (10 - i) * cpf[i].to_i
-        end
-        digit = sum % 11
-        digit = digit < 2 ? 0 : 11 - digit
+    digit1 = calculate_digit1(cpf)
+    digit2 = calculate_digit2(cpf, digit1)
+
+    if cpf[9].to_i != digit1 || cpf[10].to_i != digit2
+      errors.add(:cpf, 'não é válido')
+      return false
     end
 
-    def calculate_digit2(cpf, _digit1)
-        sum = 0
-        10.times do |i|
-        sum += (11 - i) * cpf[i].to_i
-        end
-        digit = sum % 11
-        digit = digit < 2 ? 0 : 11 - digit
+    true
+  end
+
+  def calculate_digit1(cpf)
+    sum = 0
+    9.times do |i|
+      sum += (10 - i) * cpf[i].to_i
     end
+    digit = sum % 11
+    digit = digit < 2 ? 0 : 11 - digit
+  end
+
+  def calculate_digit2(cpf, _digit1)
+    sum = 0
+    10.times do |i|
+      sum += (11 - i) * cpf[i].to_i
+    end
+    digit = sum % 11
+    digit = digit < 2 ? 0 : 11 - digit
+  end
 end

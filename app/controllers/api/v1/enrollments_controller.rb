@@ -10,7 +10,7 @@ module Api
 
       def index
         enrollments = Enrollment.page(current_page).per(count)
-        items = []
+        itemsContent = []
 
         enrollments.each do |e|
           bills = Billing.where(enrollment_id: e.id)
@@ -25,7 +25,7 @@ module Api
           }
         end
 
-        render json: { page: current_page, items: items }, status: :ok
+        render json: { page: current_page, items: itemsContent }, status: :ok
       end
 
       def show
