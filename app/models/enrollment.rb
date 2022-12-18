@@ -12,6 +12,8 @@ class Enrollment < ApplicationRecord
   validates :installments, comparison: { greater_than_or_equal_to: 1 }
   validates :due_day, numericality: { in: 1..31 }
 
+  enum status: { credit_card: 'Cartão de crédito', boleto: 'Boleto' }
+
   private
 
   def create_invoice

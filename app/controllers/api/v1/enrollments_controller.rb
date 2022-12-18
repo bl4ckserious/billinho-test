@@ -14,7 +14,7 @@ module Api
 
         enrollments.each do |e|
           bills = Billing.where(enrollment_id: e.id)
-          items << {
+          itemsContent << {
             id: e.id,
             student_id: e.student_id,
             institution_id: e.institution_id,

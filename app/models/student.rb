@@ -10,12 +10,6 @@ class Student < ApplicationRecord
 
   enum payment_method: { credit_card: 'Cartão de crédito', boleto: 'Boleto' }
 
-  def as_json(options = {})
-    super(options).tap do |json|
-      json['birth_date'] = birth_date.strftime('%d/%m/%Y')
-    end
-  end
-
   private
 
   def validate_cpf
