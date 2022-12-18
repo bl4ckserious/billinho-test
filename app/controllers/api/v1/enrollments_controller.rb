@@ -25,16 +25,16 @@ module Api
           }
         end
 
-        render json: { page: current_page, items: }, status: :ok
+        render json: { page: current_page, items: items }, status: :ok
       end
 
       def show
         enrollment = Enrollment.find(params[:id])
 
-        render json: { status: 'SUCCESS', message: 'Enrollment loaded', data: enrollment }, status: :ok
+        render json: { data: enrollment.as_json(except: %i[created_at updated_at]) }, status: :ok
       end
 
-      def create       
+      def create
         enrollment = Enrollment.new(enrollment_params)
 
         if enrollment.save
@@ -58,9 +58,9 @@ module Api
         enrollment = Enrollment.find(params[:id])
 
         if enrollment.update(enrollment_params)
-          render json: { status: 'SUCCESS', message: 'Enrollment updated', data: enrollment }, status: :ok
+          render json: { status: 'SUCCESS', message: 'Enrollment updated', data: enrollment.as_json(except: %i[created_at updated_at]) }, status: :ok
         else
-          render json: { status: 'ERROR', message: 'Enrollment not updated', data: enrollment }, status: :unprocessable_entity
+          render json: { status: 'ERROR', message: 'Enrollment not updated', data: enrollment.as_json(except: %i[created_at updated_at]) }, status: :unprocessable_entity
         end
       end
 
@@ -68,7 +68,7 @@ module Api
         enrollment = Enrollment.find(params[:id])
         enrollment.destroy
 
-        render json: { status: 'SUCCESS', message: 'Enrollment deleted', data: enrollment }, status: :ok
+        render json: { status: 'SUCCESS', message: 'Enrollment deleted', data: enrollment.as_json(except: %i[created_at updated_at]) }, status: :ok
       end
 
       private
@@ -80,8 +80,8 @@ module Api
       def authenticate
         authenticate_or_request_with_http_basic do |username, password|
           username == 'admin_ops' && password == 'billing'
+        end
       end
     end
-  end
   end
 end
