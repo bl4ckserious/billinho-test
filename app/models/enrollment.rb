@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 class Enrollment < ApplicationRecord
   after_create :create_invoice
 
