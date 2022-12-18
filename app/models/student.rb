@@ -1,28 +1,49 @@
 # frozen_string_literal: true
-
 class Student < ApplicationRecord
   has_many :enrollments, dependent: :destroy
-
   validates :name, :cpf, :payment_method, presence: true
   validates :cpf, uniqueness: true, format: { with: /\A\d{3}\.\d{3}\.\d{3}-\d{2}\z/ }
-
+  
   validate :validate_cpf
 
   enum payment_method: { credit_card: 'Cartão de crédito', boleto: 'Boleto' }
-end
 
-private
 
-def validate_cpf
-    cpf_digits = cpf.gsub(/[^\d]/, '')
-    return errors.add(:cpf, "deve ter 11 dígitos") if cpf_digits.length != 11
-    return errors.add(:cpf, "deve ser composto apenas por dígitos") if cpf_digits =~ /\D/
-  
-    weights = [10, 9, 8, 7, 6, 5, 4, 3, 2]
-    weights << weights.reduce(0) { |sum, w| sum + w * cpf_digits[w - 1].to_i } % 11
-    weights << weights[-1] + weights[0..8].reduce(0) { |sum, w| sum + w * cpf_digits[w - 1].to_i } % 11
-    weights = weights.map { |w| w == 10 || w == 11 ? 0 : w }
-  
-    errors.add(:cpf, "é inválido") unless weights.last == cpf_digits[-1].to_i && weights[-2] == cpf_digits[-2].to_i
+  def validate_cpf
+    cpf = self.cpf.gsub(/[.-]/, '')
+    if cpf.length != 11 || cpf.chars.uniq.length == 1
+      errors.add(:cpf, "não é válido")
+      return false
+    end
+
+    digit1 = calculate_digit1(cpf)
+    digit2 = calculate_digit2(cpf, digit1)
+
+    if cpf[9].to_i != digit1 || cpf[10].to_i != digit2
+      errors.add(:cpf, "não é válido")
+      return false
+    end
+    
+    return true
+  end
+
+  private
+
+  def calculate_digit1(cpf)
+    sum = 0
+    (0..8).each do |i|
+      sum += (10 - i) * cpf[i].to_i
+    end
+    digit = sum % 11
+    digit = digit < 2 ? 0 : 11 - digit
   end
   
+  def calculate_digit2(cpf, digit1)
+    sum = 0
+    (0..9).each do |i|
+      sum += (11 - i) * cpf[i].to_i
+    end
+    digit = sum % 11
+    digit = digit < 2 ? 0 : 11 - digit
+  end
+end
